@@ -1,0 +1,7 @@
+const API_URL = 'http://localhost:5000/api';
+
+export const endpoints = {
+  empanadas: `${API_URL}/empanadas`,
+};
+
+export default API_URL; 
