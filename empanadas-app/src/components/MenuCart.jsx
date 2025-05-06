@@ -110,7 +110,8 @@ const FormSection = styled.div`
 const MenuCart = ({ cart, empanadasEspeciales, empanadasComunes, children }) => {
   const calculateTotal = () => {
     return Object.entries(cart).reduce((total, [id, quantity]) => {
-      const empanada = [...empanadasEspeciales, ...empanadasComunes].find(e => e.id === id);
+      const empanada = [...empanadasEspeciales, ...empanadasComunes].find(e => String(e.id) === String(id));
+      if (!empanada) return total;
       return total + (empanada.precio * quantity);
     }, 0);
   };
@@ -122,7 +123,8 @@ const MenuCart = ({ cart, empanadasEspeciales, empanadasComunes, children }) => 
           <CartTitle>Tu Pedido</CartTitle>
           <CartItems>
             {Object.entries(cart).map(([id, quantity]) => {
-              const empanada = [...empanadasEspeciales, ...empanadasComunes].find(e => e.id === id);
+              const empanada = [...empanadasEspeciales, ...empanadasComunes].find(e => String(e.id) === String(id));
+              if (!empanada) return null;
               return (
                 <CartItem key={id}>
                   <span>{empanada.gusto} x{quantity}</span>

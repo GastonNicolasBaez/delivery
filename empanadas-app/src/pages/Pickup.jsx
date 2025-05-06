@@ -238,7 +238,10 @@ const PaymentOption = styled.button`
 
 const Pickup = () => {
   const navigate = useNavigate();
-  const [cart, setCart] = useState({});
+  const [cart, setCart] = useState(() => {
+    const carritoGuardado = localStorage.getItem('carritoEmpanadas');
+    return carritoGuardado ? JSON.parse(carritoGuardado) : {};
+  });
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -283,6 +286,10 @@ const Pickup = () => {
     fetchEmpanadas();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('carritoEmpanadas', JSON.stringify(cart));
+  }, [cart]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -299,16 +306,17 @@ const Pickup = () => {
   };
 
   const handleDecrement = (id) => {
-    if (!cart[id]) return;
-    setCart(prev => ({
-      ...prev,
-      [id]: prev[id] - 1
-    }));
-    if (cart[id] === 1) {
-      const newCart = { ...cart };
-      delete newCart[id];
-      setCart(newCart);
-    }
+    setCart(prev => {
+      const newCart = { ...prev };
+      if (!newCart[id]) return newCart;
+      
+      if (newCart[id] === 1) {
+        delete newCart[id];
+      } else {
+        newCart[id] = newCart[id] - 1;
+      }
+      return newCart;
+    });
   };
 
   const handleTimeSlotSelect = (time) => {
@@ -318,12 +326,58 @@ const Pickup = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para procesar el pedido
-    console.log('Datos del pedido:', { formData, cart });
-    // Navegar a la página de selección de productos
-    navigate('/menu');
+
+    // Construir el array de empanadas para el pedido
+    const empanadasPedido = [
+      ...empanadasEspeciales,
+      ...empanadasComunes
+    ]
+      .filter(emp => cart[emp.id]) // Solo las que están en el carrito
+      .map(emp => ({
+        id: emp.id,
+        cantidad: cart[emp.id],
+        precio: emp.precio
+      }));
+
+    // Buscar el nombre de la sucursal seleccionada
+    const sucursalSeleccionada = locations.find(loc => loc.id === formData.location)?.name || "";
+
+    // Construir el objeto del pedido
+    const pedido = {
+      nombre: formData.name,
+      telefono: formData.phone,
+      email: formData.email,
+      direccion: "", // Pickup no tiene dirección
+      sucursal: sucursalSeleccionada,
+      pisoDepto: "", // No aplica para pickup
+      notas: formData.notes,
+      tipo: "pickup",
+      metodoPago: formData.paymentMethod,
+      empanadas: empanadasPedido
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/api/pedidos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pedido)
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar el pedido');
+      }
+
+      const data = await response.json();
+      alert('¡Pedido realizado con éxito! N°: ' + data.pedidoId);
+      // Aquí puedes limpiar el carrito, el formulario, o redirigir al usuario
+    } catch (error) {
+      alert('Hubo un error al enviar el pedido');
+      console.error(error);
+    }
   };
 
   const handleBack = () => {

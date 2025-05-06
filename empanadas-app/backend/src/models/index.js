@@ -1,6 +1,8 @@
 const { Sequelize } = require('sequelize');
 const config = require('../config/database');
 const Empanada = require('./Empanada');
+const Pedido = require('./Pedido');
+const PedidoEmpanada = require('./PedidoEmpanada');
 
 const sequelize = new Sequelize(
   config.database,
@@ -13,13 +15,29 @@ const sequelize = new Sequelize(
   }
 );
 
-// Inicializar el modelo
+// Inicializar modelos
 Empanada.init(Empanada.schema, {
   sequelize,
   modelName: 'Empanada'
 });
+Pedido.init(Pedido.schema, {
+  sequelize,
+  modelName: 'Pedido'
+});
+PedidoEmpanada.init(PedidoEmpanada.schema, {
+  sequelize,
+  modelName: 'PedidoEmpanada'
+});
+
+// Relaciones
+Pedido.belongsToMany(Empanada, { through: PedidoEmpanada, foreignKey: 'pedidoId' });
+Empanada.belongsToMany(Pedido, { through: PedidoEmpanada, foreignKey: 'empanadaId' });
+PedidoEmpanada.belongsTo(Pedido, { foreignKey: 'pedidoId' });
+PedidoEmpanada.belongsTo(Empanada, { foreignKey: 'empanadaId' });
 
 module.exports = {
   sequelize,
-  Empanada
+  Empanada,
+  Pedido,
+  PedidoEmpanada
 }; 

@@ -4,6 +4,7 @@ const path = require('path');
 const { sequelize } = require('./src/models');
 const empanadaRoutes = require('./src/routes/empanadaRoutes');
 const empanadasSeed = require('./src/seeders/empanadasSeed');
+const pedidoRoutes = require('./src/routes/pedidoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -22,6 +23,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rutas
 app.use('/api/empanadas', empanadaRoutes);
+app.use('/api/pedidos', pedidoRoutes);
 
 // Sincronizar la base de datos y iniciar el servidor
 sequelize.sync({ force: true })

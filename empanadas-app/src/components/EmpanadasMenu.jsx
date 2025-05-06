@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -134,31 +134,89 @@ const Quantity = styled.span`
   font-weight: 600;
 `;
 
-const EmpanadasMenu = ({ cart, onIncrement, onDecrement, empanadasEspeciales, empanadasComunes }) => {
-  const renderEmpanadasList = (empanadas) => (
-    <EmpanadasList>
-      {empanadas.map(empanada => (
-        <EmpanadasItem key={empanada.id}>
-          <ItemInfo>
-            <ItemName>{empanada.gusto}</ItemName>
-            <ItemPrice>${empanada.precio}</ItemPrice>
-          </ItemInfo>
-          <Controls>
-            <QuantityButton 
-              onClick={() => onDecrement(empanada.id)}
-              disabled={!cart[empanada.id]}
-            >
-              -
-            </QuantityButton>
-            <Quantity>{cart[empanada.id] || 0}</Quantity>
-            <QuantityButton onClick={() => onIncrement(empanada.id)}>
-              +
-            </QuantityButton>
-          </Controls>
-        </EmpanadasItem>
-      ))}
-    </EmpanadasList>
-  );
+const EmpanadasMenu = ({ cart = {}, onIncrement, onDecrement, empanadasEspeciales = [], empanadasComunes = [] }) => {
+  useEffect(() => {
+    if (!onIncrement || !onDecrement) {
+      console.error('Las funciones onIncrement y onDecrement son requeridas');
+    }
+  }, [onIncrement, onDecrement]);
+
+  const handleIncrement = useCallback((id) => {
+    if (!id || !onIncrement) {
+      console.error('ID o función onIncrement no válidos');
+      return;
+    }
+    try {
+      onIncrement(id);
+    } catch (error) {
+      console.error('Error al incrementar:', error);
+    }
+  }, [onIncrement]);
+
+  const handleDecrement = useCallback((id) => {
+    if (!id || !onDecrement) {
+      console.error('ID o función onDecrement no válidos');
+      return;
+    }
+    try {
+      onDecrement(id);
+    } catch (error) {
+      console.error('Error al decrementar:', error);
+    }
+  }, [onDecrement]);
+
+  const renderEmpanadasList = useCallback((empanadas) => {
+    if (!Array.isArray(empanadas)) {
+      console.error('empanadas debe ser un array');
+      return <div>Error: No hay empanadas disponibles</div>;
+    }
+
+    if (empanadas.length === 0) {
+      return <div>No hay empanadas disponibles</div>;
+    }
+
+    return (
+      <EmpanadasList>
+        {empanadas.map(empanada => {
+          if (!empanada || !empanada.id) {
+            console.error('Empanada inválida:', empanada);
+            return null;
+          }
+          
+          const quantity = typeof cart[empanada.id] === 'number' ? cart[empanada.id] : 0;
+          
+          return (
+            <EmpanadasItem key={empanada.id}>
+              <ItemInfo>
+                <ItemName>{empanada.gusto || 'Sin nombre'}</ItemName>
+                <ItemPrice>${empanada.precio || 0}</ItemPrice>
+              </ItemInfo>
+              <Controls>
+                <QuantityButton 
+                  onClick={() => handleDecrement(empanada.id)}
+                  disabled={quantity <= 0}
+                  type="button"
+                >
+                  -
+                </QuantityButton>
+                <Quantity>{quantity}</Quantity>
+                <QuantityButton 
+                  onClick={() => handleIncrement(empanada.id)}
+                  type="button"
+                >
+                  +
+                </QuantityButton>
+              </Controls>
+            </EmpanadasItem>
+          );
+        })}
+      </EmpanadasList>
+    );
+  }, [cart, handleIncrement, handleDecrement]);
+
+  if (!onIncrement || !onDecrement) {
+    return <div>Error: Funciones de carrito no disponibles</div>;
+  }
 
   return (
     <Container>

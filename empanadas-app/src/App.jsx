@@ -18,6 +18,7 @@ import Pickup from './pages/Pickup';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
+import AdminPedidos from './pages/AdminPedidos';
 
 const AppContainer = styled.div`
   width: 100%;
@@ -61,6 +62,7 @@ const App = () => {
                   <Navigate to="/admin" replace />
                 )
               } />
+              <Route path="pedidos" element={<AdminPedidos />} />
             </Routes>
           </AdminContent>
         } />

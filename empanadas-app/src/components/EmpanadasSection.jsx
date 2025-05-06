@@ -258,6 +258,7 @@ const EmpanadasSection = () => {
         setFilteredEmpanadas(data);
         setLoading(false);
       } catch (error) {
+        console.error('Error:', error);
         setError(error.message);
         setLoading(false);
       }
@@ -268,7 +269,9 @@ const EmpanadasSection = () => {
 
   // Filtrar empanadas cuando cambia el filtro o el término de búsqueda
   useEffect(() => {
-    let filtered = empanadas;
+    if (!empanadas) return;
+
+    let filtered = [...empanadas];
 
     // Aplicar filtro de categoría
     if (activeFilter !== 'Todas') {
@@ -279,8 +282,8 @@ const EmpanadasSection = () => {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(empanada =>
-        empanada.nombre.toLowerCase().includes(searchLower) ||
-        empanada.descripcion.toLowerCase().includes(searchLower)
+        empanada.nombre?.toLowerCase().includes(searchLower) ||
+        empanada.descripcion?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -288,7 +291,7 @@ const EmpanadasSection = () => {
   }, [activeFilter, searchTerm, empanadas]);
 
   // Obtener categorías únicas para los filtros
-  const categories = ['Todas', ...new Set(empanadas.map(emp => emp.categoria))];
+  const categories = ['Todas', ...new Set(empanadas.map(emp => emp.categoria).filter(Boolean))];
 
   if (loading) {
     return (
@@ -338,7 +341,7 @@ const EmpanadasSection = () => {
         </SearchContainer>
 
         <EmpanadasGrid>
-          {filteredEmpanadas.map(empanada => (
+          {filteredEmpanadas && filteredEmpanadas.map(empanada => (
             <EmpanadaCard key={empanada.id}>
               <EmpanadaImageContainer>
                 <EmpanadaImage
@@ -347,6 +350,9 @@ const EmpanadasSection = () => {
                     : '/images/default-empanada.jpg'}
                   alt={empanada.gusto}
                 />
+                {empanada.categoria && (
+                  <CategoryTag>{empanada.categoria}</CategoryTag>
+                )}
               </EmpanadaImageContainer>
               <EmpanadaInfo>
                 <EmpanadaName>{empanada.gusto}</EmpanadaName>

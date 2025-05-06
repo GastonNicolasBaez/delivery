@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const PageContainer = styled.div`
   padding: 6rem 2rem 4rem;
-  background-color: #f9f9f9;
+  background-color:rgb(26, 27, 71);
   min-height: 100vh;
 `;
 

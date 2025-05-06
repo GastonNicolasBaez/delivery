@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const DashboardContainer = styled.div`
   padding: 2rem;
@@ -145,11 +145,13 @@ const AdminDashboard = () => {
           <p>Administrar información de las sucursales</p>
         </MenuItem>
 
-        <MenuItem>
-          <IconWrapper>🛍️</IconWrapper>
-          <h2>Pedidos Online</h2>
-          <p>Ver y gestionar pedidos realizados</p>
-        </MenuItem>
+        <Link to="/admin/pedidos" style={{ textDecoration: 'none' }}>
+          <MenuItem as="div">
+            <IconWrapper>🛍️</IconWrapper>
+            <h2>Pedidos Online</h2>
+            <p>Ver y gestionar pedidos realizados</p>
+          </MenuItem>
+        </Link>
 
         <MenuItem>
           <IconWrapper>📊</IconWrapper>
