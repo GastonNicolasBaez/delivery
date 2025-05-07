@@ -63,6 +63,12 @@ const FiltersContainer = styled.div`
   margin-bottom: 3rem;
   flex-wrap: wrap;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+  }
 `;
 
 const FilterTag = styled.button`
@@ -84,6 +90,24 @@ const FilterTag = styled.button`
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 15px;
   }
 `;
 
@@ -135,8 +159,8 @@ const EmpanadasGrid = styled.div`
   align-items: stretch;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -163,6 +187,20 @@ const EmpanadaCard = styled.div`
       transform: scale(1.1);
     }
   }
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+    height: 200px;
+    transform: none;
+    
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    height: 150px;
+  }
 `;
 
 const EmpanadaImageContainer = styled.div`
@@ -170,6 +208,16 @@ const EmpanadaImageContainer = styled.div`
   padding-top: 75%;
   overflow: hidden;
   flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    padding-top: 0;
+    width: 200px;
+    height: 100%;
+  }
+
+  @media (max-width: 480px) {
+    width: 150px;
+  }
 `;
 
 const EmpanadaImage = styled.img`
@@ -180,6 +228,11 @@ const EmpanadaImage = styled.img`
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+
+  @media (max-width: 768px) {
+    position: relative;
+    height: 100%;
+  }
 `;
 
 const EmpanadaInfo = styled.div`
@@ -197,6 +250,13 @@ const EmpanadaInfo = styled.div`
     background: rgba(0, 0, 0, 0.6);
     border-top-color: rgba(255, 255, 255, 0.1);
   }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    border-top: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    justify-content: center;
+  }
 `;
 
 const EmpanadaName = styled.h3`
@@ -207,6 +267,15 @@ const EmpanadaName = styled.h3`
   line-height: 1.4;
   margin: 0;
   letter-spacing: 0.5px;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const EmpanadaDescription = styled.p`
@@ -217,6 +286,20 @@ const EmpanadaDescription = styled.p`
   opacity: 0.9;
   margin: 0;
   font-weight: 300;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 1;
+  }
 `;
 
 const CategoryTag = styled.span`
@@ -233,9 +316,30 @@ const CategoryTag = styled.span`
   backdrop-filter: blur(5px);
   z-index: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+  }
 `;
 
-const BACKEND_URL = 'http://localhost:5000';
+const SpecialTag = styled.span`
+  color: gold;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+`;
+
+const BACKEND_URL = 'http://localhost:5001';
 
 const EmpanadasSection = () => {
   const [empanadas, setEmpanadas] = useState([]);
@@ -357,7 +461,11 @@ const EmpanadasSection = () => {
               <EmpanadaInfo>
                 <EmpanadaName>{empanada.gusto}</EmpanadaName>
                 <EmpanadaDescription>{empanada.descripcion}</EmpanadaDescription>
-                {empanada.esEspecial && <span style={{marginLeft: '1rem', color: 'gold'}}>★ Especial</span>}
+                {empanada.esEspecial && (
+                  <SpecialTag>
+                    <i className="fas fa-star"></i> Especial
+                  </SpecialTag>
+                )}
               </EmpanadaInfo>
             </EmpanadaCard>
           ))}

@@ -3,14 +3,29 @@ import styled from 'styled-components';
 
 const PageContainer = styled.div`
   padding: 6rem 2rem 4rem;
-  background-color: #f9f9f9;
+  background-color: var(--color-background);
   min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, var(--color-primary-light) 0%, transparent 60%),
+                radial-gradient(circle at bottom left, var(--color-lake) 0%, transparent 60%);
+    opacity: 0.1;
+    pointer-events: none;
+  }
 `;
 
 const Title = styled.h1`
   text-align: center;
   font-size: 2.5rem;
-  color: #333;
+  color: #fcdada;
   margin-bottom: 3rem;
   position: relative;
   
@@ -22,7 +37,7 @@ const Title = styled.h1`
     transform: translateX(-50%);
     width: 100px;
     height: 3px;
-    background-color: #ff6b6b;
+    background-color:#f39797;
   }
 `;
 

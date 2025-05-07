@@ -88,4 +88,62 @@ exports.actualizarEstado = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Error al actualizar el estado del pedido' });
   }
+};
+
+// Actualizar un pedido completo
+exports.actualizarPedido = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const {
+      nombre,
+      telefono,
+      email,
+      direccion,
+      sucursal,
+      pisoDepto,
+      notas,
+      metodoPago,
+      estado,
+      empanadas // Array de objetos: [{ id, cantidad, precio }]
+    } = req.body;
+
+    const pedido = await Pedido.findByPk(id, { transaction: t });
+    if (!pedido) {
+      await t.rollback();
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    // Actualizar datos del pedido
+    pedido.nombre = nombre;
+    pedido.telefono = telefono;
+    pedido.email = email;
+    pedido.direccion = direccion;
+    pedido.sucursal = sucursal;
+    pedido.pisoDepto = pisoDepto;
+    pedido.notas = notas;
+    pedido.metodoPago = metodoPago;
+    pedido.estado = estado || pedido.estado;
+    await pedido.save({ transaction: t });
+
+    // Actualizar empanadas asociadas
+    // 1. Eliminar las asociaciones actuales
+    await PedidoEmpanada.destroy({ where: { pedidoId: id }, transaction: t });
+    // 2. Crear nuevas asociaciones
+    for (const item of empanadas) {
+      await PedidoEmpanada.create({
+        pedidoId: id,
+        empanadaId: item.id,
+        cantidad: item.cantidad,
+        precio: item.precio
+      }, { transaction: t });
+    }
+
+    await t.commit();
+    res.json({ message: 'Pedido actualizado correctamente' });
+  } catch (error) {
+    await t.rollback();
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar el pedido' });
+  }
 }; 

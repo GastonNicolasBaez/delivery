@@ -26,10 +26,10 @@ app.use('/api/empanadas', empanadaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 
 // Sincronizar la base de datos y iniciar el servidor
-sequelize.sync({ force: true })
+sequelize.sync({ alter: true }) // Esto agrega la columna si no existe y no borra datos
   .then(async () => {
     console.log('Base de datos sincronizada');
-    await empanadasSeed();
+    // await empanadasSeed(); // Solo ejecutar manualmente si se desea
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en el puerto ${PORT}`);
     });

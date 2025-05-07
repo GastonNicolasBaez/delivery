@@ -55,6 +55,17 @@ const cancelBtnStyle = {
   right: 16,
   boxShadow: '0 2px 8px rgba(229,62,62,0.15)',
   transition: 'all 0.2s',
+  zIndex: 10,
+  pointerEvents: 'auto',
+
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 12px rgba(229,62,62,0.25)'
+  },
+
+  '&:active': {
+    transform: 'translateY(1px)'
+  }
 };
 
 const modifyBtnStyle = {
@@ -81,7 +92,7 @@ const pedidoCardStyle = {
   alignItems: 'flex-start',
   justifyContent: 'space-between',
   flexWrap: 'wrap',
-  position: 'relative',
+  position: 'relative'
 };
 
 const entregadoCardStyle = {
@@ -164,7 +175,7 @@ const AdminPedidos = () => {
 
   const fetchPedidos = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/pedidos');
+      const response = await fetch('http://localhost:5001/api/pedidos');
       if (!response.ok) throw new Error('Error al obtener los pedidos');
       const data = await response.json();
       setPedidos(data);
@@ -182,15 +193,24 @@ const AdminPedidos = () => {
   const actualizarEstado = async (id, nuevoEstado) => {
     setActualizando(id);
     try {
-      const response = await fetch(`http://localhost:5000/api/pedidos/${id}/estado`, {
+      const response = await fetch(`http://localhost:5001/api/pedidos/${id}/estado`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ estado: nuevoEstado })
       });
-      if (!response.ok) throw new Error('Error al actualizar el estado');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al actualizar el estado');
+      }
+      
       await fetchPedidos();
     } catch (err) {
-      alert('Error al actualizar el estado');
+      console.error('Error:', err);
+      alert(err.message || 'Error al actualizar el estado');
     } finally {
       setActualizando(null);
     }
@@ -236,9 +256,15 @@ const AdminPedidos = () => {
 
   // Cancelar pedido
   const handleCancelarPedido = async (pedido) => {
-    if (window.confirm('¿Seguro que deseas cancelar este pedido?')) {
+    if (!window.confirm('¿Estás seguro que deseas cancelar este pedido?')) {
+      return;
+    }
+    
+    try {
       await actualizarEstado(pedido.id, 'cancelado');
-      alert('Pedido cancelado correctamente.');
+    } catch (err) {
+      console.error('Error al cancelar pedido:', err);
+      alert('Error al cancelar el pedido. Por favor, intenta nuevamente.');
     }
   };
 
@@ -284,10 +310,41 @@ const AdminPedidos = () => {
   };
 
   const handleGuardarEdicion = async () => {
-    // Aquí deberías hacer un fetch/PUT al backend para actualizar el pedido
-    alert('Funcionalidad de guardado en desarrollo. Aquí se enviarán los datos editados al backend.');
-    setEditPedido(null);
-    setEditForm(null);
+    if (!editPedido) return;
+    try {
+      // Si el pedido estaba cancelado, lo ponemos como pendiente
+      const nuevoEstado = editPedido.estado === 'cancelado' ? 'pendiente' : editPedido.estado;
+      // Actualizar datos del pedido
+      const response = await fetch(`http://localhost:5001/api/pedidos/${editPedido.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: editForm.nombre,
+          telefono: editForm.telefono,
+          email: editForm.email,
+          direccion: editForm.direccion,
+          sucursal: editForm.sucursal,
+          pisoDepto: editForm.pisoDepto,
+          notas: editForm.notas,
+          metodoPago: editForm.metodoPago,
+          estado: nuevoEstado,
+          empanadas: editForm.empanadas.map(emp => ({
+            id: emp.id,
+            cantidad: emp.cantidad,
+            precio: emp.precio
+          }))
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al guardar los cambios');
+      }
+      await fetchPedidos();
+      setEditPedido(null);
+      setEditForm(null);
+    } catch (err) {
+      alert(err.message || 'Error al guardar los cambios');
+    }
   };
 
   const handleCerrarModal = () => {
@@ -411,6 +468,7 @@ const AdminPedidos = () => {
                     {pedido.notas && <p><b>Notas:</b> {pedido.notas}</p>}
                     <p><b>Método de pago:</b> {pedido.metodoPago}</p>
                     <p><b>Fecha:</b> {new Date(pedido.createdAt).toLocaleString()}</p>
+                    <p><b>Total:</b> ${pedido.Empanadas.reduce((acc, emp) => acc + emp.PedidoEmpanada.cantidad * parseFloat(emp.PedidoEmpanada.precio), 0).toFixed(2)}</p>
                   </div>
                   {/* Columna derecha: comanda y botones */}
                   <div style={{ ...colStyle, borderLeft: '1px solid #eee', paddingLeft: 24, position: 'relative' }}>
@@ -419,7 +477,7 @@ const AdminPedidos = () => {
                     <ul>
                       {pedido.Empanadas.map(emp => (
                         <li key={emp.PedidoEmpanada.id}>
-                          {emp.gusto} x{emp.PedidoEmpanada.cantidad} (${emp.PedidoEmpanada.precio} c/u)
+                          {emp.gusto} x{emp.PedidoEmpanada.cantidad}
                         </li>
                       ))}
                     </ul>

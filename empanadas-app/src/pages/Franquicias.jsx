@@ -3,14 +3,14 @@ import styled from 'styled-components';
 
 const PageContainer = styled.div`
   padding: 6rem 2rem 4rem;
-  background-color: #f9f9f9;
+  background-color: var(--color-background);
   min-height: 100vh;
 `;
 
 const Title = styled.h1`
   text-align: center;
   font-size: 2.5rem;
-  color: #333;
+  color:#fcdada;
   margin-bottom: 3rem;
   position: relative;
   

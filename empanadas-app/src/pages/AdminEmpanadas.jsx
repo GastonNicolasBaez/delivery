@@ -143,7 +143,16 @@ const ActionButton = styled(Button)`
 `;
 
 const MAX_IMAGE_SIZE_MB = 5;
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'http://localhost:5001';
+
+const CATEGORIAS = [
+  'Carne',
+  'Pollo',
+  'Vegana',
+  'Mar',
+  'Queso',
+  'Especial'
+];
 
 const AdminEmpanadas = () => {
   const navigate = useNavigate();
@@ -203,7 +212,8 @@ const AdminEmpanadas = () => {
           descripcion: newEmpanada.descripcion,
           cantidadEnStock: parseInt(newEmpanada.cantidadEnStock),
           esEspecial: newEmpanada.esEspecial,
-          precio: parseFloat(newEmpanada.precio)
+          precio: parseFloat(newEmpanada.precio),
+          categoria: newEmpanada.categoria || null
         })
       });
       if (!response.ok) throw new Error('Error al crear la empanada');
@@ -250,7 +260,8 @@ const AdminEmpanadas = () => {
           descripcion: editRow.descripcion,
           cantidadEnStock: parseInt(editRow.cantidadEnStock),
           esEspecial: editRow.esEspecial,
-          precio: parseFloat(editRow.precio)
+          precio: parseFloat(editRow.precio),
+          categoria: editRow.categoria || null
         })
       });
       if (!response.ok) throw new Error('Error al actualizar la empanada');
@@ -279,7 +290,6 @@ const AdminEmpanadas = () => {
       setEmpanadas(empanadas.filter(emp => emp.id !== id));
     } catch (err) { setError(err.message); }
   };
-  const handleLogout = () => { localStorage.removeItem('adminToken'); navigate('/admin/login'); };
 
   if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -289,7 +299,7 @@ const AdminEmpanadas = () => {
       <Header>
         <Title>Administrar Empanadas</Title>
         <div>
-          <Button onClick={handleLogout}>Cerrar Sesión</Button>
+          <Button onClick={() => navigate('/admin/dashboard')}>Volver al Dashboard</Button>
         </div>
       </Header>
       {formError && (
@@ -304,6 +314,7 @@ const AdminEmpanadas = () => {
             <Th>Cantidad en Stock</Th>
             <Th>¿Especial?</Th>
             <Th>Precio</Th>
+            <Th>Categoría</Th>
             <Th>Acciones</Th>
           </tr>
         </thead>
@@ -312,11 +323,29 @@ const AdminEmpanadas = () => {
           <tr>
             <Td>
               <label>
+                {newEmpanada.imagen ? (
                 <ImgPreview src={
-                  newEmpanada.imagen && newEmpanada.imagen.startsWith('/uploads/')
+                    newEmpanada.imagen.startsWith('/uploads/')
                     ? `${BACKEND_URL}${newEmpanada.imagen}`
-                    : '/placeholder.jpg'
+                      : newEmpanada.imagen
                 } alt="Nueva" />
+                ) : (
+                  <div style={{
+                    width: 60,
+                    height: 60,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#eee',
+                    borderRadius: 8
+                  }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                  </div>
+                )}
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleNewImageChange} />
               </label>
             </Td>
@@ -325,6 +354,12 @@ const AdminEmpanadas = () => {
             <Td><Input type="number" value={newEmpanada.cantidadEnStock} onChange={e => setNewEmpanada({ ...newEmpanada, cantidadEnStock: e.target.value })} placeholder="Cantidad en Stock" /></Td>
             <Td><input type="checkbox" checked={newEmpanada.esEspecial} onChange={e => setNewEmpanada({ ...newEmpanada, esEspecial: e.target.checked })} /></Td>
             <Td><Input type="number" value={newEmpanada.precio} onChange={e => setNewEmpanada({ ...newEmpanada, precio: e.target.value })} placeholder="Precio" /></Td>
+            <Td>
+              <select value={newEmpanada.categoria || ''} onChange={e => setNewEmpanada({ ...newEmpanada, categoria: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 8 }}>
+                <option value="">Categoría</option>
+                {CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </Td>
             <Td>
               <Button onClick={handleCreate}>Agregar</Button>
             </Td>
@@ -372,6 +407,31 @@ const AdminEmpanadas = () => {
                 {editingId === empanada.id ? (
                   <Input type="number" value={editRow.precio} onChange={e => setEditRow({ ...editRow, precio: e.target.value })} />
                 ) : empanada.precio}
+              </Td>
+              <Td>
+                {editingId === empanada.id ? (
+                  <select value={editRow.categoria || ''} onChange={e => setEditRow({ ...editRow, categoria: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 8 }}>
+                    <option value="">Categoría</option>
+                    {CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                ) : (
+                  empanada.categoria ? (
+                    <span style={{
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      color: 'var(--color-text)',
+                      borderRadius: '15px',
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      backdropFilter: 'blur(5px)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                      padding: '0.5rem 1rem',
+                      display: 'inline-block'
+                    }}>{empanada.categoria}</span>
+                  ) : (
+                    <span style={{ color: '#bbb', fontStyle: 'italic' }}>Sin categoría</span>
+                  )
+                )}
               </Td>
               <Td>
                 {editingId === empanada.id ? (

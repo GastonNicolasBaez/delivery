@@ -359,7 +359,7 @@ const Pickup = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/pedidos', {
+      const response = await fetch('http://localhost:5001/api/pedidos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

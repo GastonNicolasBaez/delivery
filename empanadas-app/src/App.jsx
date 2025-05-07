@@ -47,19 +47,19 @@ const App = () => {
     <Router>
       <ScrollToTop />
       <GlobalStyles />
-      <WhatsAppButton />
       <Routes>
         {/* Rutas Admin */}
         <Route path="/admin/*" element={
           <AdminContent>
             <Routes>
+              <Route path="/" element={<Navigate to="/admin/login" replace />} />
               <Route path="login" element={<AdminLogin />} />
               <Route path="empanadas" element={<AdminEmpanadas />} />
               <Route path="dashboard" element={
                 localStorage.getItem('adminToken') ? (
                   <AdminDashboard />
                 ) : (
-                  <Navigate to="/admin" replace />
+                  <Navigate to="/admin/login" replace />
                 )
               } />
               <Route path="pedidos" element={<AdminPedidos />} />
@@ -91,6 +91,7 @@ const App = () => {
               </Routes>
             </MainContent>
             <Footer />
+            <WhatsAppButton />
           </AppContainer>
         } />
       </Routes>

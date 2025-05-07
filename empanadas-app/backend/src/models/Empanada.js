@@ -33,6 +33,10 @@ class Empanada extends Model {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       validate: { min: 0 }
+    },
+    categoria: {
+      type: DataTypes.STRING(50),
+      allowNull: true
     }
   };
 
